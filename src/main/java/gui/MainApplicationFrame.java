@@ -41,9 +41,9 @@ public class MainApplicationFrame extends JFrame {
         /**
          *  Перехватить событие закрытия окна
          */
-        addWindowListener(new java.awt.event.WindowAdapter(){
+        addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent){
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 confirmExit();
             }
         });
@@ -65,81 +65,99 @@ public class MainApplicationFrame extends JFrame {
     }
 
 
-
     private JMenuBar generateMenuBar() {
         JMenuBar menuBar = new JMenuBar();
+        menuBar.add(lookAndFeelMenu());
+        menuBar.add(test());
+        menuBar.add(makeExit());
+        return menuBar;
 
+    }
+
+    private JMenu makeExit() {
         JMenu fileMenu = new JMenu("Выход");
         fileMenu.setMnemonic(KeyEvent.VK_F);
+        fileMenu.add(makeExitMenuItem());
+        return fileMenu;
+    }
 
-        JMenuItem exitMenuItem = new JMenuItem("Выход",KeyEvent.VK_X);
+    private JMenuItem makeExitMenuItem() {
+        JMenuItem exitMenuItem = new JMenuItem("выход", KeyEvent.VK_X);
         exitMenuItem.addActionListener((event) -> confirmExit());
-        fileMenu.add(exitMenuItem);
 
+        return exitMenuItem;
+    }
+
+    private JMenu lookAndFeelMenu() {
         JMenu lookAndFeelMenu = new JMenu("Режим отображения");
         lookAndFeelMenu.setMnemonic(KeyEvent.VK_V);
         lookAndFeelMenu.getAccessibleContext().setAccessibleDescription(
                 "Управление режимом отображения приложения");
+        lookAndFeelMenu.add(systemLookAndFeel());
+        lookAndFeelMenu.add(crossplatfromLookAndFeel());
 
-        {
-            JMenuItem systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
-            systemLookAndFeel.addActionListener((event) -> {
-                setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                this.invalidate();
-            });
-            lookAndFeelMenu.add(systemLookAndFeel);
-        }
+        return lookAndFeelMenu;
+    }
 
-        {
-            JMenuItem crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
-            crossplatformLookAndFeel.addActionListener((event) -> {
-                setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-                this.invalidate();
-            });
-            lookAndFeelMenu.add(crossplatformLookAndFeel);
-        }
+    private JMenuItem systemLookAndFeel() {
+        JMenuItem systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
+        systemLookAndFeel.addActionListener((event) -> {
+            setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            this.invalidate();
+        });
+        return systemLookAndFeel;
+    }
 
+    private JMenuItem crossplatfromLookAndFeel() {
+        JMenuItem crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
+        crossplatformLookAndFeel.addActionListener((event) -> {
+            setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            this.invalidate();
+        });
+        return crossplatformLookAndFeel;
+
+    }
+
+    private JMenu test() {
         JMenu testMenu = new JMenu("Тесты");
         testMenu.setMnemonic(KeyEvent.VK_T);
         testMenu.getAccessibleContext().setAccessibleDescription(
                 "Тестовые команды");
+        testMenu.add(addLogMessage());
+        return testMenu;
+    }
 
-        {
+        private JMenuItem addLogMessage(){
             JMenuItem addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
             addLogMessageItem.addActionListener((event) -> {
                 Logger.debug("Новая строка");
             });
-            testMenu.add(addLogMessageItem);
+            return addLogMessageItem;
         }
 
-        menuBar.add(lookAndFeelMenu);
-        menuBar.add(testMenu);
-        menuBar.add(fileMenu);
-        return menuBar;
-    }
 
-    private void setLookAndFeel(String className) {
-        try {
-            UIManager.setLookAndFeel(className);
-            SwingUtilities.updateComponentTreeUI(this);
-        } catch (ClassNotFoundException | InstantiationException
-                 | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            // just ignore
+        private void setLookAndFeel (String className){
+            try {
+                UIManager.setLookAndFeel(className);
+                SwingUtilities.updateComponentTreeUI(this);
+            } catch (ClassNotFoundException | InstantiationException
+                     | IllegalAccessException | UnsupportedLookAndFeelException e) {
+                // just ignore
+            }
+        }
+
+        /**
+         * Отображает диалоговое окно подтверждения с помощью JOptionPane.
+         */
+        private void confirmExit () {
+            int Output = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to exit",
+                    "Exit Application",
+                    JOptionPane.YES_NO_OPTION
+            );
+            if (Output == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            }
         }
     }
-
-    /**
-     * Отображает диалоговое окно подтверждения с помощью JOptionPane.
-     */
-    private void confirmExit() {
-        int Output = JOptionPane.showConfirmDialog(
-                this,
-                "Are you sure you want to exit",
-                "Exit Application",
-                JOptionPane.YES_NO_OPTION
-        );
-        if (Output == JOptionPane.YES_NO_OPTION) {
-            System.exit(0);
-        }
-    }
-}
