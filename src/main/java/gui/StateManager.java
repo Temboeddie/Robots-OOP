@@ -13,7 +13,7 @@ import java.util.Properties;
  * Этот класс управляет состояниями, сохраняя их в файл и загружая при перезапуске приложения.
  */
 public class StateManager {
-    private  final String CONFIG_DIR = "C"+ File.separator + "Users" + File.separator +"EDWARD" + File.separator +"Desktop" + File.separator +"Edward";
+    private  final String CONFIG_DIR = System.getProperty("user.home") + File.separator + "Edward";
     private  final String CONFIG_FILE = CONFIG_DIR + "/stat.cfg";
 
     private final Properties properties;
@@ -34,11 +34,13 @@ public class StateManager {
         }
     }
 
-    public void saveState(String key, String value) {
+    public void saveState(String key, String value)
+    {
         properties.setProperty(key, value);
     }
 
-    public String loadState(String key, String defaultValue) {
+    public String loadState(String key, String defaultValue)
+    {
         return properties.getProperty(key, defaultValue);
     }
 
