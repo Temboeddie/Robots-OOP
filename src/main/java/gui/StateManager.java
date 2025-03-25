@@ -1,5 +1,6 @@
 package gui;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,7 +13,7 @@ import java.util.Properties;
  * Этот класс управляет состояниями, сохраняя их в файл и загружая при перезапуске приложения.
  */
 public class StateManager {
-    private  final String CONFIG_DIR = "C:\\Users\\EDWARD\\Desktop\\Edward";
+    private  final String CONFIG_DIR = "C"+ File.separator + "Users" + File.separator +"EDWARD" + File.separator +"Desktop" + File.separator +"Edward";
     private  final String CONFIG_FILE = CONFIG_DIR + "/stat.cfg";
 
     private final Properties properties;
