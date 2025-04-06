@@ -102,12 +102,14 @@ public class MainApplicationFrame extends JFrame {
             stateManager.saveState("logWindow.y", Integer.toString(logWindow.getY()));
             stateManager.saveState("logWindow.width", Integer.toString(logWindow.getWidth()));
             stateManager.saveState("logWindow.height", Integer.toString(logWindow.getHeight()));
+            stateManager.saveState("logWindow.isMinimized",Boolean.toString(logWindow.isIcon()));
 
 
         stateManager.saveState("gameWindow.x", Integer.toString(gameWindow.getX()));
         stateManager.saveState("gameWindow.y", Integer.toString(gameWindow.getY()));
         stateManager.saveState("gameWindow.width", Integer.toString(gameWindow.getWidth()));
         stateManager.saveState("gameWindow.height", Integer.toString(gameWindow.getHeight()));
+        stateManager.saveState("gameWindow.isMinimized", Boolean.toString(gameWindow.isIcon()));
 
 
         stateManager.saveToFile();
@@ -141,13 +143,26 @@ public class MainApplicationFrame extends JFrame {
         int logY = Integer.parseInt(stateManager.loadState("logWindow.y", "10"));
         int logWidth = Integer.parseInt(stateManager.loadState("logWindow.width", "300"));
         int logHeight = Integer.parseInt(stateManager.loadState("logWindow.height", "800"));
+        boolean logMinimized = Boolean.parseBoolean(stateManager.loadState("logWindow.isMinimized" , "false"));
         logWindow.setBounds(logX, logY, logWidth, logHeight);
+        try {
+            logWindow.setIcon(logMinimized);
+        } catch (java.beans.PropertyVetoException e) {
+            e.printStackTrace();
+        }
 
         int gameX = Integer.parseInt(stateManager.loadState("gameWindow.x", "100"));
         int gameY = Integer.parseInt(stateManager.loadState("gameWindow.y", "100"));
         int gameWidth = Integer.parseInt(stateManager.loadState("gameWindow.width", "400"));
         int gameHeight = Integer.parseInt(stateManager.loadState("gameWindow.height", "400"));
+
+        boolean gameMinimized = Boolean.parseBoolean(stateManager.loadState("gameWindow.isMinimized", "false"));
         gameWindow.setBounds(gameX, gameY, gameWidth, gameHeight);
+        try {
+            gameWindow.setIcon(gameMinimized);
+        } catch (java.beans.PropertyVetoException e) {
+            e.printStackTrace();
+        }
 
 
 
