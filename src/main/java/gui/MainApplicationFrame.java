@@ -19,6 +19,8 @@ public class MainApplicationFrame extends JFrame {
     private LogWindow logWindow;
     private GameWindow gameWindow;
     private Rectangle normalBounds = new Rectangle();
+    private RobotCoordinatesWindow coordinatesWindow;
+    private RobotModel robotModel;
 
 
 
@@ -38,13 +40,15 @@ public class MainApplicationFrame extends JFrame {
 
         setContentPane(desktopPane);
 
-
-         logWindow = createLogWindow();
+        robotModel = new RobotModel();
+        logWindow = createLogWindow();
         addWindow(logWindow);
 
-         gameWindow = new GameWindow();
-        gameWindow.setSize(400, 400);
+        gameWindow = new GameWindow(robotModel);
         addWindow(gameWindow);
+
+        coordinatesWindow = new RobotCoordinatesWindow(robotModel);
+        addWindow(coordinatesWindow);
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -112,6 +116,13 @@ public class MainApplicationFrame extends JFrame {
         stateManager.saveState("gameWindow.isMinimized", Boolean.toString(gameWindow.isIcon()));
 
 
+        stateManager.saveState("coordinatesWindow.x", Integer.toString(coordinatesWindow.getX()));
+        stateManager.saveState("coordinatesWindow.y", Integer.toString(coordinatesWindow.getY()));
+        stateManager.saveState("coordinatesWindow.width", Integer.toString(coordinatesWindow.getWidth()));
+        stateManager.saveState("coordinatesWindow.height", Integer.toString(coordinatesWindow.getHeight()));
+        stateManager.saveState("coordinatesWindow.isMinimized", Boolean.toString(coordinatesWindow.isIcon()));
+
+
         stateManager.saveToFile();
     }
 
@@ -160,6 +171,17 @@ public class MainApplicationFrame extends JFrame {
         gameWindow.setBounds(gameX, gameY, gameWidth, gameHeight);
         try {
             gameWindow.setIcon(gameMinimized);
+        } catch (java.beans.PropertyVetoException e) {
+            e.printStackTrace();
+        }
+        int coordinateX = Integer.parseInt(stateManager.loadState("coordinatesWindow.x", "320"));
+        int coordinateY = Integer.parseInt(stateManager.loadState("coordinatesWindow.y", "10"));
+        int coordinateWidth = Integer.parseInt(stateManager.loadState("coordinatesWindow.width", "200"));
+        int coordinateHeight = Integer.parseInt(stateManager.loadState("coordinatesWindow.height", "100"));
+        boolean coordMinimized = Boolean.parseBoolean(stateManager.loadState("coordinatesWindow.isMinimized", "false"));
+        coordinatesWindow.setBounds(coordinateX, coordinateY, coordinateWidth, coordinateHeight);
+        try {
+            coordinatesWindow.setIcon(coordMinimized);
         } catch (java.beans.PropertyVetoException e) {
             e.printStackTrace();
         }
