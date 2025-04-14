@@ -2,7 +2,7 @@ package gui;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import log.Logger;
+
 
 /**
  * Представляет модель робота с отслеживанием положения, направления и цели.
@@ -57,9 +57,10 @@ public class RobotModel {
 
             return;
         }
-        double velocity = maxVelocity;
+        double velocity = Math.min(maxVelocity, distance / 20.0);
         double angleToTarget = angleTo(robotPositionX, robotPositionY, targetPositionX, targetPositionY);
         double angleDiff = angleToTarget - robotDirection;
+        angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
 
         double angularVelocity = maxAngularVelocity * Math.signum(angleDiff);
         angularVelocity = applyLimits(angularVelocity, -maxAngularVelocity, maxAngularVelocity);
@@ -71,7 +72,7 @@ public class RobotModel {
         }
 
 
-        moveRobot(velocity, angularVelocity, 10);
+        moveRobot(velocity, angularVelocity, 20);
     }
 
     /**
@@ -133,12 +134,9 @@ public class RobotModel {
         while (angle >= 2 * Math.PI) angle -= 2 * Math.PI;
         return angle;
     }
-
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
     }
 
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        support.removePropertyChangeListener(listener);
-    }
+
 }

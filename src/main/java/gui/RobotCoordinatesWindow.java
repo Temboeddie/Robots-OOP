@@ -1,7 +1,6 @@
 package gui;
 
 import javax.swing.*;
-import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -27,8 +26,8 @@ public class RobotCoordinatesWindow extends JInternalFrame implements PropertyCh
 
         setSize(200, 100);
         setLocation(320, 10);
-
         model.addPropertyChangeListener(this);
+
     }
 
     @Override

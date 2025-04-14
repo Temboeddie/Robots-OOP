@@ -2,13 +2,11 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+
 import java.awt.geom.AffineTransform;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Timer;
-import java.util.TimerTask;
+
 
 
 /**
@@ -18,44 +16,14 @@ import java.util.TimerTask;
 
 public class GameVisualizer extends JPanel implements PropertyChangeListener {
     private final RobotModel model;
-    private final Timer m_timer = initTimer();
-
-    private static Timer initTimer() {
-        return new Timer("events generator", true);
-    }
 
     public GameVisualizer(RobotModel model) {
         this.model = model;
         setDoubleBuffered(true);
         setBackground(Color.WHITE);
-
-        m_timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                onRedrawEvent();
-            }
-        }, 0, 50);
-        m_timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                model.update();
-            }
-        }, 0, 10);
-
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                model.setTargetPosition(e.getX(), e.getY());
-                repaint();
-            }
-        });
-
         model.addPropertyChangeListener(this);
     }
 
-    protected void onRedrawEvent() {
-        EventQueue.invokeLater(this::repaint);
-    }
 
     @Override
     public void paint(Graphics g) {
