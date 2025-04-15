@@ -31,6 +31,10 @@ public class LogWindow extends JInternalFrame implements LogChangeListener
         updateLogContent();
     }
 
+    public LogWindowSource getLogSource() {
+        return m_logSource;
+    }
+
     private void updateLogContent()
     {
         StringBuilder content = new StringBuilder();

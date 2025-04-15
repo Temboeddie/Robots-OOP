@@ -20,5 +20,6 @@ public enum LogLevel
     {
         return m_iLevel;
     }
+
 }
 

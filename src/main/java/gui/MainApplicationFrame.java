@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.*;
 
+import log.LogWindowSource;
 import log.Logger;
 
 /**
@@ -40,15 +41,22 @@ public class MainApplicationFrame extends JFrame {
 
         setContentPane(desktopPane);
 
-        robotModel = new RobotModel();
+
         logWindow = createLogWindow();
         addWindow(logWindow);
+        LogWindowSource logSource = logWindow.getLogSource();  // Get the LogWindowSource from your LogWindow
+        robotModel = new RobotModel();
 
-        gameWindow = new GameWindow(robotModel);
+
+
+        gameWindow = new GameWindow(robotModel,logSource);
         addWindow(gameWindow);
 
         coordinatesWindow = new RobotCoordinatesWindow(robotModel);
         addWindow(coordinatesWindow);
+
+
+
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -269,7 +277,18 @@ public class MainApplicationFrame extends JFrame {
         testMenu.getAccessibleContext().setAccessibleDescription(
                 "Тестовые команды");
         testMenu.add(addLogMessage());
+        testMenu.add(RobotTarget());
         return testMenu;
+    }
+
+    private JMenuItem RobotTarget(){
+        JMenuItem showTargetItem = new JMenuItem("Показать цель робота", KeyEvent.VK_T);
+        showTargetItem.addActionListener((event) -> {
+            Point target = robotModel.getTargetPosition();
+            String message = String.format("Текущая цель робота:\nX: %.2f\nY: %.2f", target.getX(), target.getY());
+            JOptionPane.showMessageDialog(this, message, "Цель робота", JOptionPane.INFORMATION_MESSAGE);
+        });
+        return showTargetItem;
     }
 
         private JMenuItem addLogMessage(){

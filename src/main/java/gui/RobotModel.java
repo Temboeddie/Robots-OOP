@@ -1,5 +1,8 @@
 package gui;
 
+import log.LogWindowSource;
+
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -14,6 +17,8 @@ public class RobotModel {
     private double robotDirection = 0;
     private double targetPositionX = 150;
     private double targetPositionY = 100;
+    private final LogWindowSource logSource;
+
 
     private static final double maxVelocity = 0.1;
     private static final double maxAngularVelocity = 0.001;
@@ -22,6 +27,7 @@ public class RobotModel {
 
     public RobotModel() {
         this.support = new PropertyChangeSupport(this);
+        this.logSource = new LogWindowSource(5);
     }
 
     public double getRobotPositionX() {
@@ -43,6 +49,7 @@ public class RobotModel {
     public void setTargetPosition(double x, double y) {
         this.targetPositionX = x;
         this.targetPositionY = y;
+
     }
 
     /**
@@ -57,6 +64,8 @@ public class RobotModel {
 
             return;
         }
+
+
         double velocity = Math.min(maxVelocity, distance / 20.0);
         double angleToTarget = angleTo(robotPositionX, robotPositionY, targetPositionX, targetPositionY);
         double angleDiff = angleToTarget - robotDirection;
@@ -138,5 +147,11 @@ public class RobotModel {
         support.addPropertyChangeListener(listener);
     }
 
+
+
+
+    public Point getTargetPosition() {
+        return new Point((int) targetPositionX, (int) targetPositionY);
+    }
 
 }
