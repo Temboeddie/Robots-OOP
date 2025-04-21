@@ -1,8 +1,12 @@
 package gui;
 
+import Controller.RobotController;
+
 import javax.swing.*;
 import java.awt.*;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -17,11 +21,20 @@ import java.beans.PropertyChangeListener;
 public class GameVisualizer extends JPanel implements PropertyChangeListener {
     private final RobotModel model;
 
-    public GameVisualizer(RobotModel model) {
+    public GameVisualizer(RobotModel model, RobotController robotcontroller) {
         this.model = model;
         setDoubleBuffered(true);
         setBackground(Color.WHITE);
+
+        addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e){
+            robotcontroller.updateTarget(e.getPoint());
+        }
+        });
+        setDoubleBuffered(true);
         model.addPropertyChangeListener(this);
+
     }
 
 
@@ -29,7 +42,12 @@ public class GameVisualizer extends JPanel implements PropertyChangeListener {
     public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
+        g2d.setTransform(new AffineTransform());
+
         drawRobot(g2d, round(model.getRobotPositionX()), round(model.getRobotPositionY()), model.getRobotDirection());
+
+
+        g2d.setTransform(new AffineTransform());
         drawTarget(g2d, round(model.getTargetPositionX()), round(model.getTargetPositionY()));
     }
 
@@ -48,6 +66,8 @@ public class GameVisualizer extends JPanel implements PropertyChangeListener {
         fillOval(g, x + 10, y, 5, 5);
         g.setColor(Color.BLACK);
         drawOval(g, x + 10, y, 5, 5);
+
+
     }
 
     private void drawTarget(Graphics2D g, int x, int y) {
