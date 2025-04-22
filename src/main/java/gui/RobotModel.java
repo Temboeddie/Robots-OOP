@@ -1,6 +1,7 @@
 package gui;
 
 import log.LogWindowSource;
+import log.Logger;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;
@@ -30,6 +31,10 @@ public class RobotModel {
         this.logSource = new LogWindowSource(5);
     }
 
+    public LogWindowSource getLogSource() {
+        return logSource;
+    }
+
     public double getRobotPositionX() {
         return robotPositionX;
     }
@@ -49,6 +54,8 @@ public class RobotModel {
     public void setTargetPosition(double x, double y) {
         this.targetPositionX = x;
         this.targetPositionY = y;
+        Logger.debug("Target updated to: (" + x + ", " + y + ")");
+
 
     }
 

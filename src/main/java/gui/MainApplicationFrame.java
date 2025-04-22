@@ -5,12 +5,11 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.*;
 
-import log.LogWindowSource;
 import log.Logger;
 
 /**
  * Что требуется сделать:
- * 1. Метод создания меню перегружен функционалом и трудно читается. 
+ * 1. Метод создания меню перегружен функционалом и трудно читается.
  * Следует разделить его на серию более простых методов (или вообще выделить отдельный класс).
  *
  */
@@ -41,22 +40,15 @@ public class MainApplicationFrame extends JFrame {
 
         setContentPane(desktopPane);
 
-
+        robotModel = new RobotModel();
         logWindow = createLogWindow();
         addWindow(logWindow);
-        LogWindowSource logSource = logWindow.getLogSource();  // Get the LogWindowSource from your LogWindow
-        robotModel = new RobotModel();
 
-
-
-        gameWindow = new GameWindow(robotModel,logSource);
+        gameWindow = new GameWindow(robotModel);
         addWindow(gameWindow);
 
         coordinatesWindow = new RobotCoordinatesWindow(robotModel);
         addWindow(coordinatesWindow);
-
-
-
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -110,11 +102,11 @@ public class MainApplicationFrame extends JFrame {
         stateManager.saveState("mainFrame.isMaximized", Boolean.toString(isMaximized));
 
 
-            stateManager.saveState("logWindow.x", Integer.toString(logWindow.getX()));
-            stateManager.saveState("logWindow.y", Integer.toString(logWindow.getY()));
-            stateManager.saveState("logWindow.width", Integer.toString(logWindow.getWidth()));
-            stateManager.saveState("logWindow.height", Integer.toString(logWindow.getHeight()));
-            stateManager.saveState("logWindow.isMinimized",Boolean.toString(logWindow.isIcon()));
+        stateManager.saveState("logWindow.x", Integer.toString(logWindow.getX()));
+        stateManager.saveState("logWindow.y", Integer.toString(logWindow.getY()));
+        stateManager.saveState("logWindow.width", Integer.toString(logWindow.getWidth()));
+        stateManager.saveState("logWindow.height", Integer.toString(logWindow.getHeight()));
+        stateManager.saveState("logWindow.isMinimized",Boolean.toString(logWindow.isIcon()));
 
 
         stateManager.saveState("gameWindow.x", Integer.toString(gameWindow.getX()));
@@ -137,22 +129,22 @@ public class MainApplicationFrame extends JFrame {
     private  void restoreState() {
         stateManager.loadFromFile();
 
-            int x = Integer.parseInt(stateManager.loadState("mainFrame.x", "50"));
-            int y = Integer.parseInt(stateManager.loadState("mainFrame.y", "50"));
-            int width = Integer.parseInt(stateManager.loadState("mainFrame.width",
-                    Integer.toString(Toolkit.getDefaultToolkit().getScreenSize().width - 100)));
-            int height = Integer.parseInt(stateManager.loadState("mainFrame.height",
-                    Integer.toString(Toolkit.getDefaultToolkit().getScreenSize().height - 100)));
+        int x = Integer.parseInt(stateManager.loadState("mainFrame.x", "50"));
+        int y = Integer.parseInt(stateManager.loadState("mainFrame.y", "50"));
+        int width = Integer.parseInt(stateManager.loadState("mainFrame.width",
+                Integer.toString(Toolkit.getDefaultToolkit().getScreenSize().width - 100)));
+        int height = Integer.parseInt(stateManager.loadState("mainFrame.height",
+                Integer.toString(Toolkit.getDefaultToolkit().getScreenSize().height - 100)));
 
         Rectangle bounds = new Rectangle(x, y, width, height);
         validateBounds(bounds);
-            normalBounds=bounds;
+        normalBounds=bounds;
 
         boolean isMaximized = Boolean.parseBoolean(stateManager.loadState("mainFrame.isMaximized", "false"));
 
         //планирует запуск приложения состояния в EDT после обработки текущей очереди событий.
         EventQueue.invokeLater(()->{;if (isMaximized) {
-                setExtendedState(JFrame.MAXIMIZED_BOTH);
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
         }
         else{
             setBounds(bounds);
@@ -277,52 +269,41 @@ public class MainApplicationFrame extends JFrame {
         testMenu.getAccessibleContext().setAccessibleDescription(
                 "Тестовые команды");
         testMenu.add(addLogMessage());
-        testMenu.add(RobotTarget());
         return testMenu;
     }
 
-    private JMenuItem RobotTarget(){
-        JMenuItem showTargetItem = new JMenuItem("Показать цель робота", KeyEvent.VK_T);
-        showTargetItem.addActionListener((event) -> {
-            Point target = robotModel.getTargetPosition();
-            String message = String.format("Текущая цель робота:\nX: %.2f\nY: %.2f", target.getX(), target.getY());
-            JOptionPane.showMessageDialog(this, message, "Цель робота", JOptionPane.INFORMATION_MESSAGE);
+    private JMenuItem addLogMessage(){
+        JMenuItem addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
+        addLogMessageItem.addActionListener((event) -> {
+            Logger.debug("Новая строка");
         });
-        return showTargetItem;
+        return addLogMessageItem;
     }
 
-        private JMenuItem addLogMessage(){
-            JMenuItem addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
-            addLogMessageItem.addActionListener((event) -> {
-                Logger.debug("Новая строка");
-            });
-            return addLogMessageItem;
-        }
 
-
-        private void setLookAndFeel (String className){
-            try {
-                UIManager.setLookAndFeel(className);
-                SwingUtilities.updateComponentTreeUI(this);
-            } catch (ClassNotFoundException | InstantiationException
-                     | IllegalAccessException | UnsupportedLookAndFeelException e) {
-                // just ignore
-            }
-        }
-
-        /**
-         * Отображает диалоговое окно подтверждения с помощью JOptionPane.
-         */
-        private void confirmExit () {
-            int Output = JOptionPane.showConfirmDialog(
-                    this,
-                    "Are you sure you want to exit",
-                    "Exit Application",
-                    JOptionPane.YES_NO_OPTION
-            );
-            if (Output == JOptionPane.YES_OPTION) {
-                saveState();
-                System.exit(0);
-            }
+    private void setLookAndFeel (String className){
+        try {
+            UIManager.setLookAndFeel(className);
+            SwingUtilities.updateComponentTreeUI(this);
+        } catch (ClassNotFoundException | InstantiationException
+                 | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            // just ignore
         }
     }
+
+    /**
+     * Отображает диалоговое окно подтверждения с помощью JOptionPane.
+     */
+    private void confirmExit () {
+        int Output = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to exit",
+                "Exit Application",
+                JOptionPane.YES_NO_OPTION
+        );
+        if (Output == JOptionPane.YES_OPTION) {
+            saveState();
+            System.exit(0);
+        }
+    }
+}

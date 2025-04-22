@@ -1,12 +1,9 @@
 package Controller;
 
-import gui.GameVisualizer;
-import gui.RobotModel;
 
-import javax.swing.*;
+import gui.RobotModel;
+import log.LogWindowSource;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,10 +15,13 @@ import java.util.TimerTask;
 public class RobotController {
 
     private final RobotModel model;
+    private final LogWindowSource logSource;
+
 
     private final Timer timer;
 
     public RobotController(RobotModel model){
+        this.logSource = model.getLogSource();
         this.model = model;
         this.timer = new Timer("event generator",true);
 
@@ -33,13 +33,13 @@ public class RobotController {
 
             }
 
-            },0,20 );
+        },0,20 );
 
     }
     public void updateTarget(Point point){
 
         model.setTargetPosition(point.x, point.y);
+
     }
 
 }
-
