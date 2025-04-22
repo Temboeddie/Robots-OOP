@@ -1,66 +1,90 @@
 package log;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Что починить:
  * 1. Этот класс порождает утечку ресурсов (связанные слушатели оказываются
  * удерживаемыми в памяти)
- * 2. Этот класс хранит активные сообщения лога, но в такой реализации он 
- * их лишь накапливает. Надо же, чтобы количество сообщений в логе было ограничено 
- * величиной m_iQueueLength (т.е. реально нужна очередь сообщений 
- * ограниченного размера) 
+ * 2. Этот класс хранит активные сообщения лога, но в такой реализации он
+ * их лишь накапливает. Надо же, чтобы количество сообщений в логе было ограничено
+ * величиной m_iQueueLength (т.е. реально нужна очередь сообщений
+ * ограниченного размера)
  */
 public class LogWindowSource
 {
-    private final int maxSize;
-    private final LogRingBuffer buffer;
-    private final List<WeakReference<LogChangeListener>> listeners = new CopyOnWriteArrayList<>();
+    private int m_iQueueLength;
 
-    public LogWindowSource(int maxSize) {
-        this.maxSize = maxSize;
-        this.buffer = new LogRingBuffer(maxSize);
+    private final RingBuffer m_messages;
+    private final List<WeakReference<LogChangeListener>> m_listeners = new ArrayList<>();
+
+    private volatile LogChangeListener[] m_activeListeners;
+
+    public LogWindowSource(int iQueueLength)
+    {
+        this.m_iQueueLength = iQueueLength;
+        this.m_messages = new RingBuffer(iQueueLength);
+
     }
 
-    public void registerListener(LogChangeListener listener) {
-        listeners.add(new WeakReference<>(listener));
-    }
-
-    public void unregisterListener(LogChangeListener listener) {
-        listeners.removeIf(ref -> {
-            LogChangeListener l = ref.get();
-            return l == null || l == listener;
-        });
-    }
-
-    public void append(LogLevel level, String message) {
-        buffer.add(new LogEntry(level, message));
-        notifyListeners();
-    }
-
-    public int size() {
-        return buffer.size();
-    }
-
-    public Iterable<LogEntry> range(int startFrom, int count) {
-        return buffer.range(startFrom, count);
-    }
-
-    public Iterable<LogEntry> all() {
-        return buffer.all();
-    }
-
-    private void notifyListeners() {
-        for (WeakReference<LogChangeListener> ref : listeners) {
-            LogChangeListener l = ref.get();
-            if (l != null) {
-                l.onLogChanged();
-            }
+    public void registerListener(LogChangeListener listener)
+    {
+        synchronized(m_listeners)
+        {
+            m_listeners.add(new WeakReference<>(listener));
+            m_activeListeners = null;
         }
     }
-    public void addMessage(String message) {
-        append(LogLevel.Info, message);
+
+    public void unregisterListener(LogChangeListener listener)
+    {
+        synchronized(m_listeners)
+        {
+            m_listeners.removeIf(ref -> {
+                LogChangeListener l = ref.get();
+                return l == null || l == listener;
+            });
+            m_activeListeners = null;
+        }
+    }
+
+    public void append(LogLevel logLevel, String strMessage)
+    {
+        LogEntry entry = new LogEntry(logLevel, strMessage);
+        m_messages.append(entry);
+        List<LogChangeListener> listenersToNotify = new ArrayList<>();
+
+        synchronized (m_listeners) {
+            m_listeners.removeIf(ref -> ref.get() == null); // clean up GC'd references
+
+            for (WeakReference<LogChangeListener> ref : m_listeners) {
+                LogChangeListener listener = ref.get();
+                if (listener != null) {
+                    listenersToNotify.add(listener);
+                }
+            }
+        }
+        for (LogChangeListener listener : listenersToNotify)
+        {
+            listener.onLogChanged();
+        }
+    }
+
+    public int size()
+    {
+        return m_messages.size();
+    }
+
+    public Iterable<LogEntry> range(int startFrom, int count)
+    {
+        return m_messages.range(startFrom, count);
+    }
+
+    public Iterable<LogEntry> all()
+    {
+        return m_messages;
     }
 }
