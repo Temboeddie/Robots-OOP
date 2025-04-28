@@ -1,11 +1,13 @@
 package gui;
 
+import LocalizationManager.LocalizationManager;
 import log.LogWindowSource;
 import log.Logger;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.text.MessageFormat;
 
 
 /**
@@ -19,6 +21,7 @@ public class RobotModel {
     private double targetPositionX = 150;
     private double targetPositionY = 100;
     private final LogWindowSource logSource;
+    private  final LocalizationManager  localizationManager;
 
 
     private static final double maxVelocity = 0.1;
@@ -26,9 +29,10 @@ public class RobotModel {
 
     private final PropertyChangeSupport support;
 
-    public RobotModel() {
+    public RobotModel(LocalizationManager  localizationManager) {
         this.support = new PropertyChangeSupport(this);
         this.logSource = new LogWindowSource(5);
+        this.localizationManager = localizationManager;
     }
 
     public LogWindowSource getLogSource() {
@@ -54,7 +58,13 @@ public class RobotModel {
     public void setTargetPosition(double x, double y) {
         this.targetPositionX = x;
         this.targetPositionY = y;
-        Logger.debug("Target updated to: (" + x + ", " + y + ")");
+        Logger.debug(
+                MessageFormat.format(
+                        localizationManager.getString("target.updated"),
+                        x,
+                        y
+                )
+        );
 
 
     }

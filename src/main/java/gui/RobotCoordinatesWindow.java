@@ -1,5 +1,7 @@
 package gui;
 
+import LocalizationManager.LocalizationManager;
+
 import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -12,9 +14,10 @@ import java.beans.PropertyChangeListener;
 public class RobotCoordinatesWindow extends JInternalFrame implements PropertyChangeListener {
     private final JLabel positionLabel;
     private final RobotModel model;
+    private LocalizationManager localizationManager;
 
-    public RobotCoordinatesWindow(RobotModel model) {
-        super("Robot Coordinates", true, true, true, true);
+    public RobotCoordinatesWindow(RobotModel model,LocalizationManager localizationManager) {
+        super(localizationManager.getString("window.coordinates"), true, true, true, true);
         this.model = model;
         setIconifiable(true);
 
@@ -38,4 +41,6 @@ public class RobotCoordinatesWindow extends JInternalFrame implements PropertyCh
                     ", Y: " + String.format("%.1f", newPosition[1]));
         }
     }
+
+
 }

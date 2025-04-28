@@ -2,7 +2,11 @@ package gui;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
+import LocalizationManager.LocalizationManager;
+import LocalizationManager.SettingsManager;
 import javax.swing.*;
 
 import log.Logger;
@@ -16,11 +20,17 @@ import log.Logger;
 public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final StateManager stateManager;
+    private final SettingsManager settingsManager;
     private LogWindow logWindow;
+    private final LocalizationManager localizationManager;
     private GameWindow gameWindow;
     private Rectangle normalBounds = new Rectangle();
     private RobotCoordinatesWindow coordinatesWindow;
     private RobotModel robotModel;
+
+
+
+
 
 
 
@@ -31,6 +41,10 @@ public class MainApplicationFrame extends JFrame {
 
 
         stateManager = new StateManager();
+        // Load the language preference on startup
+        this.settingsManager = new SettingsManager();
+        String initialLanguage = settingsManager.loadLanguagePreference();
+        this.localizationManager = new LocalizationManager(initialLanguage);
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds(inset, inset,
@@ -40,14 +54,14 @@ public class MainApplicationFrame extends JFrame {
 
         setContentPane(desktopPane);
 
-        robotModel = new RobotModel();
+        robotModel = new RobotModel(  localizationManager);
         logWindow = createLogWindow();
         addWindow(logWindow);
 
-        gameWindow = new GameWindow(robotModel);
+        gameWindow = new GameWindow(robotModel,localizationManager);
         addWindow(gameWindow);
 
-        coordinatesWindow = new RobotCoordinatesWindow(robotModel);
+        coordinatesWindow = new RobotCoordinatesWindow(robotModel,localizationManager);
         addWindow(coordinatesWindow);
 
         setJMenuBar(generateMenuBar());
@@ -75,12 +89,12 @@ public class MainApplicationFrame extends JFrame {
     }
 
     protected LogWindow createLogWindow() {
-        LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
+        LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource(),localizationManager);
         logWindow.setLocation(10, 10);
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
 
-        Logger.debug("Протокол работает");
+        Logger.debug(localizationManager.getString("log.protocol_working"));
         return logWindow;
     }
 
@@ -188,6 +202,7 @@ public class MainApplicationFrame extends JFrame {
 
 
 
+
     }
 
     /**
@@ -215,29 +230,30 @@ public class MainApplicationFrame extends JFrame {
         menuBar.add(lookAndFeelMenu());
         menuBar.add(test());
         menuBar.add(makeExit());
+        menuBar.add(languageButton());
         return menuBar;
 
     }
 
     private JMenu makeExit() {
-        JMenu fileMenu = new JMenu("Выход");
+        JMenu fileMenu = new JMenu(localizationManager.getString("menu.exit"));
         fileMenu.setMnemonic(KeyEvent.VK_F);
         fileMenu.add(makeExitMenuItem());
         return fileMenu;
     }
 
     private JMenuItem makeExitMenuItem() {
-        JMenuItem exitMenuItem = new JMenuItem("выход", KeyEvent.VK_X);
+        JMenuItem exitMenuItem = new JMenuItem(localizationManager.getString("menu.exit"), KeyEvent.VK_X);
         exitMenuItem.addActionListener((event) -> confirmExit());
 
         return exitMenuItem;
     }
 
     private JMenu lookAndFeelMenu() {
-        JMenu lookAndFeelMenu = new JMenu("Режим отображения");
+        JMenu lookAndFeelMenu = new JMenu(localizationManager.getString("menu.display_mode"));
         lookAndFeelMenu.setMnemonic(KeyEvent.VK_V);
-        lookAndFeelMenu.getAccessibleContext().setAccessibleDescription(
-                "Управление режимом отображения приложения");
+        lookAndFeelMenu.getAccessibleContext().setAccessibleDescription(localizationManager.getString(
+                "menu.display_description"));
         lookAndFeelMenu.add(systemLookAndFeel());
         lookAndFeelMenu.add(crossplatfromLookAndFeel());
 
@@ -245,7 +261,7 @@ public class MainApplicationFrame extends JFrame {
     }
 
     private JMenuItem systemLookAndFeel() {
-        JMenuItem systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
+        JMenuItem systemLookAndFeel = new JMenuItem(localizationManager.getString("menu.system_scheme"), KeyEvent.VK_S);
         systemLookAndFeel.addActionListener((event) -> {
             setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             this.invalidate();
@@ -254,7 +270,7 @@ public class MainApplicationFrame extends JFrame {
     }
 
     private JMenuItem crossplatfromLookAndFeel() {
-        JMenuItem crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
+        JMenuItem crossplatformLookAndFeel = new JMenuItem(localizationManager.getString("menu.universal_scheme"), KeyEvent.VK_S);
         crossplatformLookAndFeel.addActionListener((event) -> {
             setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
             this.invalidate();
@@ -264,18 +280,18 @@ public class MainApplicationFrame extends JFrame {
     }
 
     private JMenu test() {
-        JMenu testMenu = new JMenu("Тесты");
+        JMenu testMenu = new JMenu(localizationManager.getString("menu.tests"));
         testMenu.setMnemonic(KeyEvent.VK_T);
-        testMenu.getAccessibleContext().setAccessibleDescription(
-                "Тестовые команды");
+        testMenu.getAccessibleContext().setAccessibleDescription(localizationManager.getString(
+                "menu.test_description"));
         testMenu.add(addLogMessage());
         return testMenu;
     }
 
     private JMenuItem addLogMessage(){
-        JMenuItem addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
+        JMenuItem addLogMessageItem = new JMenuItem(localizationManager.getString("menu.log_message"), KeyEvent.VK_S);
         addLogMessageItem.addActionListener((event) -> {
-            Logger.debug("Новая строка");
+            Logger.debug(localizationManager.getString("New_line"));
         });
         return addLogMessageItem;
     }
@@ -290,18 +306,64 @@ public class MainApplicationFrame extends JFrame {
             // just ignore
         }
     }
+    private JMenu languageButton(){
+        JMenu languageButton = new JMenu(localizationManager.getString("menu.language"));
+        languageButton.setMnemonic(KeyEvent.VK_L);
+
+        JMenuItem EnglishItem = new JMenuItem("English");
+        EnglishItem.addActionListener(event -> changeLanguage("en"));
+
+        JMenuItem RussianItem = new JMenuItem("Русский");
+        RussianItem.addActionListener(event -> changeLanguage("ru"));
+
+        languageButton.add(EnglishItem);
+        languageButton.add(RussianItem);
+        return languageButton;
+    }
+    private void changeLanguage(String languageCode) {
+        settingsManager.saveLanguagePreference(languageCode);
+        localizationManager.setLocale(languageCode);
+        refreshUI();
+    }
+    private void refreshUI() {
+        // Rebuild the menu bar
+        setJMenuBar(generateMenuBar());
+
+
+
+        logWindow.setTitle(localizationManager.getString("window.log"));
+        gameWindow.setTitle(localizationManager.getString("window.game"));
+        coordinatesWindow.setTitle(localizationManager.getString("window.coordinates"));
+
+        // Force UI update
+        SwingUtilities.updateComponentTreeUI(this);
+        repaint();
+    }
+
 
     /**
      * Отображает диалоговое окно подтверждения с помощью JOptionPane.
      */
     private void confirmExit () {
-        int Output = JOptionPane.showConfirmDialog(
+        Object[] options = {
+                localizationManager.getString("button.yes"),
+                localizationManager.getString("button.no")
+        };
+
+        int choice = JOptionPane.showOptionDialog(
                 this,
-                "Are you sure you want to exit",
-                "Exit Application",
-                JOptionPane.YES_NO_OPTION
+                localizationManager.getString("exit.confirm"),
+                localizationManager.getString("exit.heading"),
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[1]
         );
-        if (Output == JOptionPane.YES_OPTION) {
+
+
+
+        if (choice == JOptionPane.YES_OPTION) {
             saveState();
             System.exit(0);
         }

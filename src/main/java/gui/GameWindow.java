@@ -1,6 +1,7 @@
 package gui;
 
 import Controller.RobotController;
+import LocalizationManager.LocalizationManager;
 
 import java.awt.BorderLayout;
 
@@ -12,9 +13,10 @@ public class GameWindow extends JInternalFrame
 
     private final RobotController controller;
     private final GameVisualizer visualizer;
-    public GameWindow(RobotModel model)
+    private LocalizationManager localizationManager;
+    public GameWindow(RobotModel model,LocalizationManager localizationManager)
     {
-        super("Игровое поле", true, true, true, true);
+        super(localizationManager.getString("window.game"), true, true, true, true);
         setIconifiable(true);
 
         this.controller = new RobotController(model);
