@@ -43,8 +43,8 @@ public class MainApplicationFrame extends JFrame {
         stateManager = new StateManager();
         // Load the language preference on startup
         this.settingsManager = new SettingsManager();
-        String initialLanguage = settingsManager.loadLanguagePreference();
-        this.localizationManager = new LocalizationManager(initialLanguage);
+        String language = settingsManager.loadLanguagePreference();
+        this.localizationManager = new LocalizationManager(language);
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds(inset, inset,

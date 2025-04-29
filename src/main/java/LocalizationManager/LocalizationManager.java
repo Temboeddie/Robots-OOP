@@ -15,7 +15,7 @@ public class LocalizationManager {
     private static Locale currentLocale;
 
     public LocalizationManager(String initialLanguage) {
-        setLocale(initialLanguage);
+        setLocale(initialLanguage !=null? initialLanguage: "en");
     }
 
     /**
@@ -24,8 +24,14 @@ public class LocalizationManager {
      */
 
     public void setLocale(String language) {
-        currentLocale = new Locale(language);
-        resourceBundle = ResourceBundle.getBundle("localization.messages", currentLocale);
+        try {
+            currentLocale = new Locale(language);
+            resourceBundle = ResourceBundle.getBundle("localization.messages", currentLocale);
+        } catch (Exception e){
+            Logger.error("Invalid language code: " + language + ", defaulting to English");
+            currentLocale = Locale.ENGLISH;
+            resourceBundle = ResourceBundle.getBundle("localization.messages", currentLocale);
+        }
     }
 
     /**

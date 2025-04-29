@@ -10,6 +10,8 @@ import java.util.Properties;
  */
 public class SettingsManager {
     private static final String SETTINGS_FILE = "settings.properties";
+    private static final String DEFAULT_LANGUAGE = "en";
+
 
     public  void saveLanguagePreference(String language) {
         Properties props = new Properties();
@@ -25,11 +27,15 @@ public class SettingsManager {
         Properties props = new Properties();
         try (InputStream in = new FileInputStream(SETTINGS_FILE)) {
             props.load(in);
+            String language = props.getProperty("language");
 
-            return props.getProperty("language");
+            return isValidLanguage(language) ? language : DEFAULT_LANGUAGE;
         } catch (IOException e) {
             Logger.error("Error loading language preference: " + e.getMessage());
-            return null;
+            return DEFAULT_LANGUAGE;
         }
+    }
+    private boolean isValidLanguage(String language) {
+        return language != null && (language.equals("en") || language.equals("ru"));
     }
 }
